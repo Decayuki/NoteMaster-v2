@@ -24,8 +24,7 @@ def sign_in_with_google():
     
     try:
         # Vérifier si nous revenons d'une authentification Google
-        query_params = st.experimental_get_query_params()
-        if 'code' in query_params:
+        if 'code' in st.query_params:
             st.success("✅ Code d'autorisation reçu ! Connexion en cours...")
             return True
             
