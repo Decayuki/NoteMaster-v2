@@ -59,12 +59,11 @@ def sign_in_with_google():
             "provider": "google",
             "options": {
                 "redirectTo": redirect_url,
+                "scopes": "openid email profile",
                 "queryParams": {
                     "access_type": "offline",
                     "prompt": "consent select_account",
-                    "response_type": "code",
-                    "scope": "openid email profile",
-                    "client_id": "591747806915-suod9pe127pkboqj2ucsll24vkfttrfc.apps.googleusercontent.com"
+                    "response_type": "code"
                 }
             }
         }
