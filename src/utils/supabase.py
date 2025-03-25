@@ -58,12 +58,13 @@ def sign_in_with_google():
         auth_config = {
             "provider": "google",
             "options": {
-                "redirectTo": redirect_url,
+                "redirectTo": "https://rygktzcbjsigbfkodobx.supabase.co/auth/v1/callback",
                 "scopes": "openid email profile",
                 "queryParams": {
                     "access_type": "offline",
                     "prompt": "consent select_account",
-                    "response_type": "code"
+                    "response_type": "code",
+                    "redirect_uri": "https://rygktzcbjsigbfkodobx.supabase.co/auth/v1/callback"
                 }
             }
         }
