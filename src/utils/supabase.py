@@ -61,9 +61,10 @@ def sign_in_with_google():
                 "redirectTo": redirect_url,
                 "queryParams": {
                     "access_type": "offline",
-                    "prompt": "consent",
+                    "prompt": "consent select_account",
                     "response_type": "code",
-                    "scope": "email profile"
+                    "scope": "openid email profile",
+                    "client_id": "591747806915-suod9pe127pkboqj2ucsll24vkfttrfc.apps.googleusercontent.com"
                 }
             }
         }
@@ -71,9 +72,23 @@ def sign_in_with_google():
         st.write("Configuration de l'authentification :")
         st.json(auth_config)
         
+        # Log de la requête complète
+        st.write("### URL complète qui sera appelée :")
+        auth_url = supabase.auth.get_sign_in_with_oauth_url(auth_config)
+        st.code(auth_url)
+
+        # Log des headers et autres détails
+        st.write("### Détails de la requête :")
+        st.json({
+            "headers": supabase.auth._client.headers,
+            "base_url": supabase.auth._client.base_url,
+            "auth_config": auth_config
+        })
+
+        # Tentative de connexion
         auth_response = supabase.auth.sign_in_with_oauth(auth_config)
         
-        st.write("Réponse de Supabase :")
+        st.write("### Réponse de Supabase :")
         st.json({
             "has_url": hasattr(auth_response, 'url'),
             "url": getattr(auth_response, 'url', None),
