@@ -24,46 +24,53 @@ def show_login_page():
     else:
         st.write("Connectez-vous pour accéder à vos notes")
         
+        # Zone de débogage au-dessus du bouton
+        with st.expander("🔍 Informations de débogage", expanded=True):
+            st.info("Cliquez sur le bouton ci-dessous pour voir les détails de la connexion")
+        
         # Bouton de connexion Google
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            try:
-                auth_url = sign_in_with_google()
-                st.markdown(f'''
-                    <div style="text-align: center;">
-                        <a href="{auth_url}" target="_self">
-                            <button style="
-                                background-color: #4285F4;
-                                color: white;
-                                padding: 10px 20px;
-                                border: none;
-                                border-radius: 5px;
-                                cursor: pointer;
-                                width: 100%;
-                                display: inline-flex;
-                                align-items: center;
-                                justify-content: center;
-                                gap: 10px;
-                                font-family: Arial, sans-serif;
-                                text-decoration: none;
-                            ">
-                                <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
-                                Se connecter avec Google
-                            </button>
-                        </a>
-                    </div>
-                ''', unsafe_allow_html=True)
-                
-                # Ajouter les informations de débogage
-                with st.expander("Débogage"):
-                    st.write("URL d'authentification :")
-                    st.code(auth_url)
+            if st.button("Se connecter avec Google", type="primary", use_container_width=True):
+                try:
+                    auth_url = sign_in_with_google()
                     
-            except Exception as e:
-                st.error(f"Erreur lors de l'initialisation de la connexion Google : {str(e)}")
-                st.error("Détails de l'erreur :")
-                import traceback
-                st.code(traceback.format_exc())
+                    # Afficher l'URL de redirection
+                    st.success("URL d'authentification générée avec succès !")
+                    st.code(auth_url, language="text")
+                    
+                    # Bouton de redirection
+                    st.markdown(f'''
+                        <div style="text-align: center; margin-top: 20px;">
+                            <a href="{auth_url}" target="_self">
+                                <button style="
+                                    background-color: #4285F4;
+                                    color: white;
+                                    padding: 10px 20px;
+                                    border: none;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                    width: 100%;
+                                    display: inline-flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    gap: 10px;
+                                    font-family: Arial, sans-serif;
+                                    text-decoration: none;
+                                ">
+                                    <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
+                                    Continuer vers Google
+                                </button>
+                            </a>
+                        </div>
+                    ''', unsafe_allow_html=True)
+                    
+                except Exception as e:
+                    st.error("### ❌ Erreur lors de la connexion")
+                    st.error(f"Message : {str(e)}")
+                    st.error("Détails techniques :")
+                    import traceback
+                    st.code(traceback.format_exc(), language="python")
         
         # Message d'information
         st.info("""
