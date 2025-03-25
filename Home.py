@@ -41,58 +41,77 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Ajouter le répertoire src au PYTHONPATH
-src_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src')
-sys.path.append(src_path)
-
 try:
-    from src.pages.login import show_login_page
-    from src.pages.notes import show_notes_page
-    from src.pages.quiz import show_quiz_page
-    from src.utils.supabase import get_user_session
+    st.title("Bienvenue sur NoteMaster")
+    st.write("Connectez-vous pour accéder à vos notes")
     
-    # Vérifier la session utilisateur
-    session = get_user_session()
+    # Bouton de connexion Google
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Se connecter avec Google", type="primary", use_container_width=True):
+            try:
+                # Ajouter le répertoire src au PYTHONPATH
+                src_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src')
+                sys.path.append(src_path)
+                
+                from src.utils.supabase import sign_in_with_google
+                
+                auth_url = sign_in_with_google()
+                st.success("URL d'authentification générée avec succès !")
+                st.code(auth_url, language="text")
+                
+                st.markdown(f'''
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="{auth_url}" target="_self">
+                            <button style="
+                                background-color: #4285F4;
+                                color: white;
+                                padding: 10px 20px;
+                                border: none;
+                                border-radius: 5px;
+                                cursor: pointer;
+                                width: 100%;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 10px;
+                                font-family: Arial, sans-serif;
+                                text-decoration: none;
+                            ">
+                                <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
+                                Continuer vers Google
+                            </button>
+                        </a>
+                    </div>
+                ''', unsafe_allow_html=True)
+                
+            except Exception as e:
+                st.error("### ❌ Erreur lors de la connexion")
+                st.error(f"Message : {str(e)}")
+                st.error("Stack trace :")
+                import traceback
+                st.code(traceback.format_exc())
+                
+                st.write("### 🔍 Informations de débogage")
+                st.json({
+                    "PYTHONPATH": sys.path,
+                    "src_path": src_path if 'src_path' in locals() else "non défini",
+                    "current_dir": os.getcwd(),
+                    "files_in_src": os.listdir(src_path) if 'src_path' in locals() and os.path.exists(src_path) else "src n'existe pas",
+                    "files_in_root": os.listdir(os.path.dirname(os.path.abspath(__file__)))
+                })
     
-    if not session:
-        show_login_page()
-    else:
-        # Stocker les informations utilisateur dans la session
-        st.session_state.user = session.user
-        
-        # Sidebar avec navigation
-        with st.sidebar:
-            st.title(f"NoteMaster v2.0.0")
-            st.write(f"👤 {st.session_state.user.email}")
-            
-            # Menu de navigation
-            selected = st.radio(
-                "Navigation",
-                ["📝 Mes Notes", "❓ Quiz", "📊 Statistiques"],
-                index=0
-            )
-        
-        # Afficher la page sélectionnée
-        if selected == "📝 Mes Notes":
-            show_notes_page()
-        elif selected == "❓ Quiz":
-            show_quiz_page()
-        else:
-            st.title("📊 Mes Statistiques")
-            # TODO: Implémenter les statistiques
-            
+    # Message d'information
+    st.info("""
+        En vous connectant avec Google :
+        - Accédez à vos notes depuis n'importe quel appareil
+        - Gardez une trace de votre progression
+        - Synchronisez automatiquement vos données
+    """)
+    
 except Exception as e:
     st.error("### ❌ Erreur lors du chargement de l'application")
     st.error(f"Message : {str(e)}")
     st.error("Stack trace :")
     import traceback
     st.code(traceback.format_exc())
-    
-    st.write("### 🔍 Informations de débogage")
-    st.json({
-        "PYTHONPATH": sys.path,
-        "src_path": src_path,
-        "current_dir": os.getcwd(),
-        "files_in_src": os.listdir(src_path) if os.path.exists(src_path) else "src n'existe pas",
-        "files_in_root": os.listdir(os.path.dirname(os.path.abspath(__file__)))
-    })
