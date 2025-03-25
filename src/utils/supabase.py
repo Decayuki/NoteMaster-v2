@@ -80,9 +80,9 @@ def sign_in_with_google():
         # Log des headers et autres détails
         st.write("### Détails de la requête :")
         st.json({
-            "headers": supabase.auth._client.headers,
-            "base_url": supabase.auth._client.base_url,
-            "auth_config": auth_config
+            "auth_config": auth_config,
+            "provider": auth_config["provider"],
+            "redirect_to": auth_config["options"]["redirectTo"]
         })
 
         # Tentative de connexion
