@@ -23,8 +23,22 @@ def sign_in_with_google():
     
     try:
         # Détecter si nous sommes sur Streamlit Cloud
-        is_cloud = os.getenv('HOSTNAME', '').endswith('streamlit.app')
+        is_cloud = any([
+            os.getenv('HOSTNAME', '').endswith('streamlit.app'),  # Vérification du hostname
+            'STREAMLIT_SHARING_PORT' in os.environ,  # Vérification de la variable Streamlit Cloud
+            os.getenv('IS_STREAMLIT_CLOUD') == 'true'  # Vérification manuelle
+        ])
         os.environ['IS_STREAMLIT_CLOUD'] = 'true' if is_cloud else 'false'
+        
+        # Debug de la détection
+        import streamlit as st
+        st.write("Détection de l'environnement cloud :")
+        st.json({
+            "HOSTNAME": os.getenv('HOSTNAME', 'non défini'),
+            "STREAMLIT_SHARING_PORT": os.getenv('STREAMLIT_SHARING_PORT', 'non défini'),
+            "IS_STREAMLIT_CLOUD": os.getenv('IS_STREAMLIT_CLOUD', 'non défini'),
+            "is_cloud (résultat)": is_cloud
+        })
         
         # Importer la configuration
         from src.config import get_redirect_url, get_auth_redirect_url, get_auth_callback_url
