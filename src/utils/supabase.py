@@ -61,7 +61,9 @@ def sign_in_with_google():
                 "redirectTo": redirect_url,
                 "queryParams": {
                     "access_type": "offline",
-                    "prompt": "consent"
+                    "prompt": "consent",
+                    "response_type": "code",
+                    "scope": "email profile"
                 }
             }
         }
