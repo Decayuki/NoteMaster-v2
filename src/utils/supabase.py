@@ -108,8 +108,17 @@ def sign_in_with_google():
         st.write("### Réponse de Supabase :")
         
         # Utiliser JavaScript pour ouvrir dans un nouvel onglet
-        js = f'''window.open("{auth_response.url}", "_self");'''
-        st.components.v1.html(f'<script>{js}</script><p>Redirection vers Google...</p>', height=100)
+        js = f'''window.open("{auth_response.url}", "_blank");'''
+        st.components.v1.html(
+            f'''
+            <script>{js}</script>
+            <div style="padding: 10px; border: 1px solid #f0f2f6; border-radius: 5px; background-color: #f8f9fa;">
+                <p>⚠️ Une nouvelle fenêtre va s'ouvrir pour l'authentification Google.</p>
+                <p>Une fois connecté, revenez sur cette fenêtre et <strong>rafraîchissez la page</strong>.</p>
+            </div>
+            ''',
+            height=150
+        )
         st.json({
             "has_url": hasattr(auth_response, 'url'),
             "url": getattr(auth_response, 'url', None),
