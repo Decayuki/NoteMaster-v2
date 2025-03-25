@@ -26,18 +26,23 @@ def sign_in_with_google():
         redirect_url = "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app" if is_cloud else "http://localhost:8501"
         
         # Initialiser la connexion Google
-        auth_url = supabase.auth.sign_in_with_oauth({
+        auth_response = supabase.auth.sign_in_with_oauth({
             "provider": "google",
             "options": {
-                "redirectTo": redirect_url,  # Notez le changement de redirect_to à redirectTo
-                "skipBrowserRedirect": True  # Important : empêche la redirection automatique
+                "redirectTo": redirect_url,
+                "queryParams": {
+                    "access_type": "offline",
+                    "prompt": "consent",
+                    "hd": "*"  # Permet tous les domaines
+                }
             }
-        }).url
+        })
         
-        st.write("Debug - URL d'authentification :")
-        st.code(auth_url)
-        
-        return auth_url
+        # Vérifier la réponse
+        if not hasattr(auth_response, 'url') or not auth_response.url:
+            raise Exception("L'URL d'authentification est manquante dans la réponse")
+            
+        return auth_response.url
         
     except Exception as e:
         st.error(f"Erreur lors de l'initialisation de Google Auth : {str(e)}")
