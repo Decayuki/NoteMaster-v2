@@ -25,27 +25,25 @@ def sign_in_with_google():
         is_cloud = os.getenv('HOSTNAME', '').endswith('streamlit.app')
         redirect_url = "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app" if is_cloud else "http://localhost:8501"
         
-        st.write(f"Debug - URL de redirection : {redirect_url}")
-        
         # Initialiser la connexion Google
-        auth_response = supabase.auth.sign_in_with_oauth({
+        auth_url = supabase.auth.sign_in_with_oauth({
             "provider": "google",
             "options": {
-                "redirect_to": redirect_url,
-                "queryParams": {
-                    "access_type": "offline",
-                    "prompt": "consent"
-                }
+                "redirectTo": redirect_url,  # Notez le changement de redirect_to à redirectTo
+                "skipBrowserRedirect": True  # Important : empêche la redirection automatique
             }
-        })
+        }).url
         
-        st.write("Debug - Réponse de l'authentification :")
-        st.json(auth_response)
+        st.write("Debug - URL d'authentification :")
+        st.code(auth_url)
         
-        return auth_response.url
+        return auth_url
         
     except Exception as e:
         st.error(f"Erreur lors de l'initialisation de Google Auth : {str(e)}")
+        st.error("Détails de l'erreur :")
+        import traceback
+        st.code(traceback.format_exc())
         raise e
 
 def sign_out():
