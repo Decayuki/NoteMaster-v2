@@ -2,14 +2,24 @@ import streamlit as st
 import sys
 import os
 
-# Ajouter le répertoire courant au PYTHONPATH
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Ajouter le répertoire src au PYTHONPATH
+src_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src')
+sys.path.append(src_path)
 
 from pages.login import show_login_page
 from pages.notes import show_notes_page
 from pages.quiz import show_quiz_page
 from utils.supabase import get_user_session
 from streamlit_config import configure_streamlit
+
+# Débogage des chemins
+st.write("### Débogage des chemins")
+st.json({
+    "PYTHONPATH": sys.path,
+    "src_path": src_path,
+    "current_dir": os.getcwd(),
+    "files_in_src": os.listdir(src_path) if os.path.exists(src_path) else "src n'existe pas"
+})
 
 # Configuration de l'application
 APP_NAME = "NoteMaster"
