@@ -89,6 +89,10 @@ def sign_in_with_google():
         auth_response = supabase.auth.sign_in_with_oauth(auth_config)
         
         st.write("### Réponse de Supabase :")
+        
+        # Utiliser JavaScript pour ouvrir dans un nouvel onglet
+        js = f'window.open("{auth_response.url}", "_blank");'
+        st.components.v1.html(f'<script>{js}</script><p>Si la redirection ne se fait pas automatiquement, <a href="{auth_response.url}" target="_blank">cliquez ici</a></p>', height=100)
         st.json({
             "has_url": hasattr(auth_response, 'url'),
             "url": getattr(auth_response, 'url', None),
