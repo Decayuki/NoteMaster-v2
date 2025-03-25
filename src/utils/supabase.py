@@ -20,8 +20,15 @@ def sign_in_with_google():
     """Initialise la connexion avec Google"""
     import streamlit as st
     import json
+    from urllib.parse import parse_qs, urlparse
     
     try:
+        # Vérifier si nous revenons d'une authentification Google
+        query_params = st.experimental_get_query_params()
+        if 'code' in query_params:
+            st.success("✅ Code d'autorisation reçu ! Connexion en cours...")
+            return True
+            
         # Détecter si nous sommes sur Streamlit Cloud
         is_cloud = True  # Force l'environnement cloud
         os.environ['IS_STREAMLIT_CLOUD'] = 'true'  # Force la variable d'environnement
@@ -91,8 +98,8 @@ def sign_in_with_google():
         st.write("### Réponse de Supabase :")
         
         # Utiliser JavaScript pour ouvrir dans un nouvel onglet
-        js = f'window.open("{auth_response.url}", "_blank");'
-        st.components.v1.html(f'<script>{js}</script><p>Si la redirection ne se fait pas automatiquement, <a href="{auth_response.url}" target="_blank">cliquez ici</a></p>', height=100)
+        js = f'''window.open("{auth_response.url}", "_self");'''
+        st.components.v1.html(f'<script>{js}</script><p>Redirection vers Google...</p>', height=100)
         st.json({
             "has_url": hasattr(auth_response, 'url'),
             "url": getattr(auth_response, 'url', None),
