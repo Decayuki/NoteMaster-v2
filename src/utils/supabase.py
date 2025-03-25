@@ -22,9 +22,13 @@ def sign_in_with_google():
     import json
     
     try:
-        # Détecter si nous sommes sur Streamlit Cloud ou en local
+        # Détecter si nous sommes sur Streamlit Cloud
         is_cloud = os.getenv('HOSTNAME', '').endswith('streamlit.app')
-        redirect_url = "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app" if is_cloud else "http://localhost:8501"
+        os.environ['IS_STREAMLIT_CLOUD'] = 'true' if is_cloud else 'false'
+        
+        # Importer la configuration
+        from src.config import get_redirect_url
+        redirect_url = get_redirect_url()
         
         st.write("### Débogage de la connexion Google")
         st.write("Configuration :")
@@ -80,7 +84,8 @@ def sign_in_with_google():
             "SUPABASE_URL exists": bool(os.getenv("SUPABASE_URL")),
             "SUPABASE_KEY exists": bool(os.getenv("SUPABASE_KEY")),
             "HOSTNAME": os.getenv("HOSTNAME", "non défini"),
-            "PORT": os.getenv("PORT", "non défini")
+            "PORT": os.getenv("PORT", "non défini"),
+            "IS_STREAMLIT_CLOUD": os.getenv("IS_STREAMLIT_CLOUD", "non défini")
         })
         
         raise e
