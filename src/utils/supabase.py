@@ -74,7 +74,7 @@ def sign_in_with_google():
         
         # Log de la requête complète
         st.write("### URL complète qui sera appelée :")
-        auth_url = supabase.auth.get_sign_in_with_oauth_url(auth_config)
+        auth_url = supabase.auth.get_sign_in_with_oauth(auth_config)
         st.code(auth_url)
 
         # Log des headers et autres détails
