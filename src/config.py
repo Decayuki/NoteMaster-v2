@@ -13,13 +13,13 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Configuration de l'application
 APP_NAME = "NoteMaster"
-VERSION = "0.8.3"
+VERSION = "0.8.4"
 
 # URLs de l'application
 APP_URLS = {
     "cloud": {
         "base": "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app",
-        "redirect": "https://rygktzcbjsigbfkodobx.supabase.co/auth/v1/callback",
+        "redirect": "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app/auth/callback",
         "callback": "https://rygktzcbjsigbfkodobx.supabase.co/auth/v1/callback"
     }
 }
