@@ -23,11 +23,8 @@ def sign_in_with_google():
     
     try:
         # Détecter si nous sommes sur Streamlit Cloud
-        is_cloud = any([
-            os.getenv('HOSTNAME', '').endswith('streamlit.app'),  # Vérification du hostname
-            'STREAMLIT_SHARING_PORT' in os.environ,  # Vérification de la variable Streamlit Cloud
-            os.getenv('IS_STREAMLIT_CLOUD') == 'true'  # Vérification manuelle
-        ])
+        is_cloud = True  # Force l'environnement cloud
+        os.environ['IS_STREAMLIT_CLOUD'] = 'true'  # Force la variable d'environnement
         os.environ['IS_STREAMLIT_CLOUD'] = 'true' if is_cloud else 'false'
         
         # Debug de la détection
