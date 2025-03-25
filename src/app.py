@@ -1,7 +1,16 @@
 import streamlit as st
+import sys
+import os
+
+# Ajouter le répertoire courant au PYTHONPATH
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from pages.login import show_login_page
 from utils.supabase import get_user_session
-from config import APP_NAME, VERSION
+
+# Configuration de l'application
+APP_NAME = "NoteMaster"
+VERSION = "2.0.0"
 
 # Configuration de la page
 st.set_page_config(

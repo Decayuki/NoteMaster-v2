@@ -1,5 +1,11 @@
 import streamlit as st
-from ..utils.supabase import sign_in_with_google, sign_out
+import sys
+import os
+
+# Ajouter le répertoire parent au PYTHONPATH
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from utils.supabase import sign_in_with_google, sign_out
 
 def show_login_page():
     """Affiche la page de connexion"""
