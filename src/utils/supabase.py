@@ -18,10 +18,14 @@ def get_user_session():
 
 def sign_in_with_google():
     """Initialise la connexion avec Google"""
+    # Détecter si nous sommes sur Streamlit Cloud ou en local
+    is_cloud = os.getenv('HOSTNAME', '').endswith('streamlit.app')
+    redirect_url = "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app" if is_cloud else "http://localhost:8501"
+    
     return supabase.auth.sign_in_with_oauth({
         "provider": "google",
         "options": {
-            "redirect_to": "http://localhost:8501"  # URL de redirection après connexion
+            "redirect_to": redirect_url
         }
     })
 

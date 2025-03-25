@@ -6,6 +6,8 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from pages.login import show_login_page
+from pages.notes import show_notes_page
+from pages.quiz import show_quiz_page
 from utils.supabase import get_user_session
 
 # Configuration de l'application
@@ -61,14 +63,12 @@ def main():
         
         # Afficher la page sélectionnée
         if selected == "📝 Mes Notes":
-            st.title("Mes Notes")
-            # TODO: Importer et afficher la page des notes
+            show_notes_page()
         elif selected == "❓ Quiz":
-            st.title("Mode Quiz")
-            # TODO: Importer et afficher la page des quiz
+            show_quiz_page()
         else:
-            st.title("Mes Statistiques")
-            # TODO: Importer et afficher la page des statistiques
+            st.title("📊 Mes Statistiques")
+            # TODO: Implémenter les statistiques
 
 if __name__ == "__main__":
     main()
