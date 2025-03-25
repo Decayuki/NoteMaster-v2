@@ -25,8 +25,19 @@ def sign_in_with_google():
     try:
         # Vérifier si nous revenons d'une authentification Google
         if 'code' in st.query_params:
+            code = st.query_params['code']
             st.success("✅ Code d'autorisation reçu ! Connexion en cours...")
-            return True
+            try:
+                # Essayer d'échanger le code contre une session
+                session = supabase.auth.exchange_code_for_session({'auth_code': code})
+                if session:
+                    st.success("✅ Connexion réussie !")
+                    # Effacer les paramètres d'URL pour éviter les problèmes de rafraîchissement
+                    st.query_params.clear()
+                    return True
+            except Exception as e:
+                st.error(f"❌ Erreur lors de l'échange du code : {str(e)}")
+            return False
             
         # Détecter si nous sommes sur Streamlit Cloud
         is_cloud = True  # Force l'environnement cloud
