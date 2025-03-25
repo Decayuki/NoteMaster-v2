@@ -27,14 +27,18 @@ def sign_in_with_google():
         os.environ['IS_STREAMLIT_CLOUD'] = 'true' if is_cloud else 'false'
         
         # Importer la configuration
-        from src.config import get_redirect_url
-        redirect_url = get_redirect_url()
+        from src.config import get_redirect_url, get_auth_redirect_url, get_auth_callback_url
+        base_url = get_redirect_url()
+        redirect_url = get_auth_redirect_url()
+        callback_url = get_auth_callback_url()
         
         st.write("### Débogage de la connexion Google")
         st.write("Configuration :")
         st.json({
             "is_cloud": is_cloud,
+            "base_url": base_url,
             "redirect_url": redirect_url,
+            "callback_url": callback_url,
             "supabase_url": SUPABASE_URL,
             "has_supabase_key": bool(SUPABASE_KEY)
         })
