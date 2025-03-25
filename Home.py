@@ -43,7 +43,11 @@ def main():
     """, unsafe_allow_html=True)
 
     try:
-        st.title("Bienvenue sur NoteMaster")
+        # Importer la version
+        from src.config import VERSION
+        
+        # En-tête avec version
+        st.title(f"Bienvenue sur NoteMaster v{VERSION}")
         st.write("Connectez-vous pour accéder à vos notes")
         
         # Bouton de connexion Google
