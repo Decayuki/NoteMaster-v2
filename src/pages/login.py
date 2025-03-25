@@ -15,19 +15,22 @@ def show_login_page():
     if "user" in st.session_state:
         st.write(f"Connecté en tant que : {st.session_state.user.email}")
         if st.button("Se déconnecter"):
-            sign_out()
-            st.session_state.clear()
-            st.rerun()
+            try:
+                sign_out()
+                st.session_state.clear()
+                st.rerun()
+            except Exception as e:
+                st.error(f"Erreur lors de la déconnexion : {str(e)}")
     else:
         st.write("Connectez-vous pour accéder à vos notes")
         
         # Bouton de connexion Google
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            if st.button("Se connecter avec Google", use_container_width=True):
+            try:
                 auth_url = sign_in_with_google()
                 st.markdown(f'''
-                    <a href="{auth_url}" target="_self">
+                    <a href="{auth_url}" target="_self" id="google-login-button">
                         <button style="
                             background-color: #4285F4;
                             color: white;
@@ -43,10 +46,25 @@ def show_login_page():
                             font-family: Arial, sans-serif;
                         ">
                             <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
-                            Continuer avec Google
+                            Se connecter avec Google
                         </button>
                     </a>
                 ''', unsafe_allow_html=True)
+                
+                # Ajouter du JavaScript pour gérer la redirection
+                st.markdown('''
+                    <script>
+                        document.getElementById('google-login-button').addEventListener('click', function(e) {
+                            e.preventDefault();
+                            window.location.href = this.href;
+                        });
+                    </script>
+                ''', unsafe_allow_html=True)
+                
+            except Exception as e:
+                st.error(f"Erreur lors de l'initialisation de la connexion Google : {str(e)}")
+                st.write("Détails techniques pour le débogage :")
+                st.code(str(e))
         
         # Message d'information
         st.info("""
