@@ -105,14 +105,15 @@ def sign_in_with_google():
         auth_config = {
             "provider": "google",
             "options": {
-                "redirectTo": "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app",
+                "redirectTo": "https://rygktzcbjsigbfkodobx.supabase.co/auth/v1/callback",
                 "scopes": "email profile",
                 "queryParams": {
                     "access_type": "offline",
                     "prompt": "consent",
                     "code_challenge": code_challenge,
                     "code_challenge_method": "S256",
-                    "redirect_uri": "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app"
+                    "redirect_uri": "https://rygktzcbjsigbfkodobx.supabase.co/auth/v1/callback",
+                    "redirect_to": "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app"
                 }
             }
         }
