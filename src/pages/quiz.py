@@ -5,7 +5,7 @@ import os
 # Ajouter le répertoire parent au PYTHONPATH
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from utils.supabase import supabase
+from utils.supabase import conn
 
 def show_quiz_page():
     """Affiche la page de quiz"""
@@ -22,7 +22,7 @@ def show_quiz_page():
         if selected_chapter:
             # Récupérer les notes de l'utilisateur pour ce chapitre
             try:
-                notes = supabase.table("notes")\
+                notes = conn.table("notes")\
                     .select("*")\
                     .eq("user_id", st.session_state.user.id)\
                     .eq("subject", selected_subject)\

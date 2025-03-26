@@ -5,7 +5,7 @@ import os
 # Ajouter le répertoire parent au PYTHONPATH
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from utils.supabase import supabase
+from utils.supabase import conn
 
 def show_notes_page():
     """Affiche la page de prise de notes"""
@@ -40,7 +40,7 @@ def show_notes_page():
                             "title": note_title,
                             "content": note_content
                         }
-                        supabase.table("notes").insert(note).execute()
+                        conn.table("notes").insert(note).execute()
                         st.success("Note sauvegardée avec succès !")
                         
                         # Vider les champs
