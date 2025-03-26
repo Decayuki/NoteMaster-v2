@@ -13,7 +13,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Configuration de l'application
 APP_NAME = "NoteMaster"
-VERSION = "0.8.20"
+VERSION = "0.8.21"
 
 # URLs de l'application
 APP_URLS = {

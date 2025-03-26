@@ -14,7 +14,21 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def get_user_session():
     """Récupère la session utilisateur actuelle"""
-    return supabase.auth.get_session()
+    import streamlit as st
+    
+    try:
+        # Vérifier d'abord dans la session Streamlit
+        if 'supabase_session' in st.session_state:
+            return st.session_state.supabase_session
+            
+        # Sinon, essayer de récupérer depuis Supabase
+        session = supabase.auth.get_session()
+        if session:
+            # Stocker dans la session Streamlit
+            st.session_state.supabase_session = session
+        return session
+    except Exception:
+        return None
 
 def sign_in_with_google():
     """Initialise la connexion avec Google"""
@@ -31,9 +45,13 @@ def sign_in_with_google():
                 # Essayer d'échanger le code contre une session
                 session = supabase.auth.exchange_code_for_session({'auth_code': code})
                 if session:
+                    # Stocker la session dans Streamlit
+                    st.session_state.supabase_session = session
                     st.success("✅ Connexion réussie !")
                     # Effacer les paramètres d'URL pour éviter les problèmes de rafraîchissement
                     st.query_params.clear()
+                    # Recharger la page pour appliquer la session
+                    st.rerun()
                     return True
             except Exception as e:
                 st.error(f"❌ Erreur lors de l'échange du code : {str(e)}")
