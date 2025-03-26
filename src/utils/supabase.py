@@ -80,10 +80,17 @@ def sign_in_with_google():
         
         try:
             # Générer l'URL d'authentification
-            auth_url = conn.auth.sign_in_with_oauth(auth_config)
+            auth_response = conn.auth.sign_in_with_oauth(auth_config)
+            
+            # Vérifier si nous avons une URL
+            if hasattr(auth_response, 'url'):
+                auth_url = auth_response.url
+            else:
+                st.error("❌ Impossible d'obtenir l'URL d'authentification")
+                return None
             
             # Utiliser JavaScript pour ouvrir dans un nouvel onglet
-            js = f'''window.open("{auth_url['url']}", "_blank");'''
+            js = f'''window.open("{auth_url}", "_blank");'''
             st.components.v1.html(
                 f'''
                 <script>{js}</script>
@@ -95,7 +102,7 @@ def sign_in_with_google():
                 height=150
             )
             
-            return auth_url["url"]
+            return auth_url
         except Exception as e:
             st.error("❌ Erreur lors de l'authentification")
             st.error(f"Message : {str(e)}")
