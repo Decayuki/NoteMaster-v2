@@ -3,6 +3,7 @@ from st_supabase_connection import SupabaseConnection
 import secrets
 import hashlib
 import base64
+import json
 
 # Initialiser la connexion Supabase
 conn = st.connection('supabase', type=SupabaseConnection)
@@ -31,10 +32,14 @@ def sign_in_with_google():
         
         if code:
             try:
-                # Récupérer le code_verifier de la session
-                code_verifier = st.session_state.get('code_verifier')
+                # Récupérer le code_verifier du cookie
+                code_verifier = None
+                if 'code_verifier' in st.session_state:
+                    code_verifier = st.session_state['code_verifier']
+                
                 if not code_verifier:
                     st.error("❌ Code verifier manquant. Veuillez réessayer la connexion.")
+                    st.query_params.clear()
                     return False
                 
                 # Essayer d'échanger le code contre une session
@@ -55,12 +60,11 @@ def sign_in_with_google():
                     return True
             except Exception as e:
                 st.error(f"❌ Erreur lors de l'échange du code : {str(e)}")
+                st.query_params.clear()
             return False
         
         # Générer une paire PKCE
         code_verifier, code_challenge = generate_pkce_pair()
-        # Sauvegarder le code_verifier pour plus tard
-        st.session_state['code_verifier'] = code_verifier
         
         # Configurer l'authentification Google
         auth_config = {
@@ -85,24 +89,32 @@ def sign_in_with_google():
             # Vérifier si nous avons une URL
             if hasattr(auth_response, 'url'):
                 auth_url = auth_response.url
+                
+                # Sauvegarder le code_verifier dans la session
+                st.session_state['code_verifier'] = code_verifier
+                
+                # Utiliser JavaScript pour ouvrir dans un nouvel onglet et sauvegarder le code_verifier
+                js = f'''
+                // Ouvrir l'URL d'authentification dans un nouvel onglet
+                window.open("{auth_url}", "_blank");
+                '''
+                
+                st.components.v1.html(
+                    f'''
+                    <script>{js}</script>
+                    <div style="padding: 10px; border: 1px solid #f0f2f6; border-radius: 5px; background-color: #f8f9fa;">
+                        <p>⚠️ Une nouvelle fenêtre va s'ouvrir pour l'authentification Google.</p>
+                        <p>Une fois connecté, revenez sur cette fenêtre et <strong>rafraîchissez la page</strong>.</p>
+                    </div>
+                    ''',
+                    height=150
+                )
+                
+                return auth_url
             else:
                 st.error("❌ Impossible d'obtenir l'URL d'authentification")
                 return None
             
-            # Utiliser JavaScript pour ouvrir dans un nouvel onglet
-            js = f'''window.open("{auth_url}", "_blank");'''
-            st.components.v1.html(
-                f'''
-                <script>{js}</script>
-                <div style="padding: 10px; border: 1px solid #f0f2f6; border-radius: 5px; background-color: #f8f9fa;">
-                    <p>⚠️ Une nouvelle fenêtre va s'ouvrir pour l'authentification Google.</p>
-                    <p>Une fois connecté, revenez sur cette fenêtre et <strong>rafraîchissez la page</strong>.</p>
-                </div>
-                ''',
-                height=150
-            )
-            
-            return auth_url
         except Exception as e:
             st.error("❌ Erreur lors de l'authentification")
             st.error(f"Message : {str(e)}")
