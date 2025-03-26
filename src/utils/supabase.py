@@ -1,32 +1,14 @@
-from supabase import create_client
-import os
-from dotenv import load_dotenv
+import streamlit as st
+from st_supabase_connection import SupabaseConnection
 
-# Charger les variables d'environnement
-load_dotenv()
-
-# Configuration Supabase
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-# Créer le client Supabase
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Initialiser la connexion Supabase
+conn = st.connection('supabase', type=SupabaseConnection)
+supabase = conn.client
 
 def get_user_session():
     """Récupère la session utilisateur actuelle"""
-    import streamlit as st
-    
     try:
-        # Vérifier d'abord dans la session Streamlit
-        if 'supabase_session' in st.session_state:
-            return st.session_state.supabase_session
-            
-        # Sinon, essayer de récupérer depuis Supabase
-        session = supabase.auth.get_session()
-        if session:
-            # Stocker dans la session Streamlit
-            st.session_state.supabase_session = session
-        return session
+        return conn.auth.get_user()
     except Exception:
         return None
 
