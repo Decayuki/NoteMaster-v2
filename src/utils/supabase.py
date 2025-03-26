@@ -4,10 +4,43 @@ import secrets
 import hashlib
 import base64
 import json
+import os
+import tempfile
 
 # Initialiser la connexion Supabase
 conn = st.connection('supabase', type=SupabaseConnection)
 supabase = conn.client
+
+# Chemin du fichier temporaire pour stocker le code_verifier
+TEMP_FILE = os.path.join(tempfile.gettempdir(), 'notemaster_auth.tmp')
+
+def save_code_verifier(code_verifier):
+    """Sauvegarde le code_verifier dans un fichier temporaire"""
+    try:
+        with open(TEMP_FILE, 'w') as f:
+            json.dump({'code_verifier': code_verifier}, f)
+        return True
+    except Exception:
+        return False
+
+def load_code_verifier():
+    """Charge le code_verifier depuis le fichier temporaire"""
+    try:
+        if os.path.exists(TEMP_FILE):
+            with open(TEMP_FILE, 'r') as f:
+                data = json.load(f)
+                return data.get('code_verifier')
+    except Exception:
+        pass
+    return None
+
+def delete_code_verifier():
+    """Supprime le fichier temporaire du code_verifier"""
+    try:
+        if os.path.exists(TEMP_FILE):
+            os.remove(TEMP_FILE)
+    except Exception:
+        pass
 
 def generate_pkce_pair():
     """Génère une paire code_verifier/code_challenge pour PKCE"""
@@ -32,11 +65,8 @@ def sign_in_with_google():
         
         if code:
             try:
-                # Récupérer le code_verifier du cookie
-                code_verifier = None
-                if 'code_verifier' in st.session_state:
-                    code_verifier = st.session_state['code_verifier']
-                
+                # Récupérer le code_verifier du fichier temporaire
+                code_verifier = load_code_verifier()
                 if not code_verifier:
                     st.error("❌ Code verifier manquant. Veuillez réessayer la connexion.")
                     st.query_params.clear()
@@ -50,9 +80,8 @@ def sign_in_with_google():
                 
                 if session:
                     st.success("✅ Connexion réussie !")
-                    # Nettoyer la session
-                    if 'code_verifier' in st.session_state:
-                        del st.session_state['code_verifier']
+                    # Nettoyer le fichier temporaire
+                    delete_code_verifier()
                     # Effacer les paramètres d'URL
                     st.query_params.clear()
                     # Recharger la page
@@ -61,23 +90,29 @@ def sign_in_with_google():
             except Exception as e:
                 st.error(f"❌ Erreur lors de l'échange du code : {str(e)}")
                 st.query_params.clear()
+                delete_code_verifier()
             return False
         
         # Générer une paire PKCE
         code_verifier, code_challenge = generate_pkce_pair()
         
+        # Sauvegarder le code_verifier dans un fichier temporaire
+        if not save_code_verifier(code_verifier):
+            st.error("❌ Erreur lors de la sauvegarde du code verifier")
+            return None
+        
         # Configurer l'authentification Google
         auth_config = {
             "provider": "google",
             "options": {
-                "redirectTo": "https://rygktzcbjsigbfkodobx.supabase.co/auth/v1/callback",
+                "redirectTo": "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app",
                 "scopes": "email profile",
                 "queryParams": {
                     "access_type": "offline",
                     "prompt": "consent",
                     "code_challenge": code_challenge,
                     "code_challenge_method": "S256",
-                    "redirect_uri": "https://rygktzcbjsigbfkodobx.supabase.co/auth/v1/callback"
+                    "redirect_uri": "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app"
                 }
             }
         }
@@ -90,15 +125,8 @@ def sign_in_with_google():
             if hasattr(auth_response, 'url'):
                 auth_url = auth_response.url
                 
-                # Sauvegarder le code_verifier dans la session
-                st.session_state['code_verifier'] = code_verifier
-                
-                # Utiliser JavaScript pour ouvrir dans un nouvel onglet et sauvegarder le code_verifier
-                js = f'''
-                // Ouvrir l'URL d'authentification dans un nouvel onglet
-                window.open("{auth_url}", "_blank");
-                '''
-                
+                # Utiliser JavaScript pour ouvrir dans un nouvel onglet
+                js = f'''window.open("{auth_url}", "_blank");'''
                 st.components.v1.html(
                     f'''
                     <script>{js}</script>
@@ -113,6 +141,7 @@ def sign_in_with_google():
                 return auth_url
             else:
                 st.error("❌ Impossible d'obtenir l'URL d'authentification")
+                delete_code_verifier()
                 return None
             
         except Exception as e:
@@ -127,7 +156,6 @@ def sign_in_with_google():
 
 def sign_out():
     """Déconnexion de l'utilisateur"""
-    # Nettoyer la session
-    if 'code_verifier' in st.session_state:
-        del st.session_state['code_verifier']
+    # Nettoyer le fichier temporaire
+    delete_code_verifier()
     return conn.auth.sign_out()
