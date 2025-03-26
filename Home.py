@@ -10,6 +10,16 @@ def main():
         layout="wide",
         initial_sidebar_state="expanded"
     )
+    
+    # Vérifier si l'utilisateur est déjà connecté
+    from src.utils.supabase import get_user_session
+    user_session = get_user_session()
+    
+    if user_session:
+        # Rediriger vers le tableau de bord
+        from src.pages.dashboard import show_dashboard
+        show_dashboard()
+        return
 
     # Style personnalisé
     st.markdown("""
