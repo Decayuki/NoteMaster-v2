@@ -1,5 +1,6 @@
 import streamlit as st
 from st_supabase_connection import SupabaseConnection
+from urllib.parse import parse_qs
 
 # Initialiser la connexion Supabase
 conn = st.connection('supabase', type=SupabaseConnection)
@@ -12,6 +13,35 @@ def get_user_session():
     except Exception:
         return None
 
+def extract_session_from_url():
+    """Extrait les informations de session de l'URL"""
+    try:
+        fragment = st.query_params.get('fragment', None)
+        if fragment:
+            params = parse_qs(fragment)
+            if 'access_token' in params and 'refresh_token' in params:
+                return {
+                    'access_token': params['access_token'][0],
+                    'refresh_token': params['refresh_token'][0],
+                    'expires_in': params.get('expires_in', [None])[0],
+                    'token_type': params.get('token_type', [None])[0]
+                }
+    except Exception as e:
+        st.error(f"Erreur lors de l'extraction des paramètres : {str(e)}")
+    return None
+
+def handle_auth_callback():
+    """Gère le retour de l'authentification Google"""
+    try:
+        session = extract_session_from_url()
+        if session:
+            # Mettre à jour la session Supabase
+            conn.auth.set_session(session)
+            st.success("✅ Connexion réussie !")
+            st.rerun()
+    except Exception as e:
+        st.error(f"❌ Erreur lors de l'authentification : {str(e)}")
+
 def sign_in_with_google():
     """Initialise la connexion avec Google"""
     try:
@@ -19,7 +49,7 @@ def sign_in_with_google():
         auth_config = {
             "provider": "google",
             "options": {
-                "redirectTo": "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app",
+                "redirectTo": "https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app/auth",
                 "queryParams": {
                     "access_type": "offline",
                     "prompt": "consent",
