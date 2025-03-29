@@ -82,32 +82,32 @@ def sign_in_with_google():
                 icon="ℹ️"
             )
             
-            # Utiliser JavaScript pour ouvrir dans un nouvel onglet
-            js = f'''function openGoogleAuth() {{ window.open("{auth_url}", "_blank"); }}'''
+            # Afficher l'URL directement pour le débogage
+            st.success("URL d'authentification générée avec succès !")
             
-            # Créer un bouton stylisé pour l'authentification
+            # Créer un lien direct vers l'URL d'authentification
             st.markdown(f'''
-                <script>{js}</script>
                 <div style="text-align: center; margin: 20px 0;">
-                    <button 
-                        onclick="openGoogleAuth()" 
-                        style="
-                            background-color: #4285F4;
-                            color: white;
-                            padding: 12px 24px;
-                            border: none;
-                            border-radius: 5px;
-                            cursor: pointer;
-                            font-size: 16px;
-                            font-weight: bold;
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 10px;
-                        ">
-                        <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
-                        Se connecter avec Google
-                    </button>
+                    <a href="{auth_url}" target="_self">
+                        <button 
+                            style="
+                                background-color: #4285F4;
+                                color: white;
+                                padding: 12px 24px;
+                                border: none;
+                                border-radius: 5px;
+                                cursor: pointer;
+                                font-size: 16px;
+                                font-weight: bold;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 10px;
+                            ">
+                            <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
+                            Continuer vers Google
+                        </button>
+                    </a>
                 </div>
                 
                 <div style="padding: 15px; border: 1px solid #f0f2f6; border-radius: 8px; background-color: #f8f9fa; margin-top: 20px;">

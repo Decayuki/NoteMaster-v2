@@ -33,45 +33,42 @@ def show_login_page():
         st.write("Connectez-vous pour accéder à vos notes")
         
         # Bouton de connexion Google
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if st.button("Se connecter avec Google", type="primary", use_container_width=True):
-                try:
-                    auth_url = sign_in_with_google()
-                    
-                    if auth_url:
-                        # Bouton de redirection
-                        st.markdown(f'''
-                            <div style="text-align: center; margin-top: 20px;">
-                                <a href="{auth_url}" target="_self">
-                                    <button style="
-                                        background-color: #4285F4;
-                                        color: white;
-                                        padding: 10px 20px;
-                                        border: none;
-                                        border-radius: 5px;
-                                        cursor: pointer;
-                                        width: 100%;
-                                        display: inline-flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        gap: 10px;
-                                        font-family: Arial, sans-serif;
-                                        text-decoration: none;
-                                    ">
-                                        <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
-                                        Continuer vers Google
-                                    </button>
-                                </a>
-                            </div>
-                        ''', unsafe_allow_html=True)
-                    
-                except Exception as e:
-                    st.error("### ❌ Erreur lors de la connexion")
-                    st.error(f"Message : {str(e)}")
-                    st.error("Détails techniques :")
-                    import traceback
-                    st.code(traceback.format_exc(), language="python")
+        try:
+            # Obtenir l'URL d'authentification directement
+            auth_url = sign_in_with_google()
+            
+            if auth_url:
+                # Afficher un bouton de connexion directe
+                st.markdown(f'''
+                    <div style="text-align: center; margin: 20px 0;">
+                        <a href="{auth_url}" target="_self">
+                            <button style="
+                                background-color: #4285F4;
+                                color: white;
+                                padding: 12px 24px;
+                                border: none;
+                                border-radius: 5px;
+                                cursor: pointer;
+                                width: 100%;
+                                font-size: 16px;
+                                font-weight: bold;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 10px;
+                            ">
+                                <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
+                                Se connecter avec Google
+                            </button>
+                        </a>
+                    </div>
+                ''', unsafe_allow_html=True)
+        except Exception as e:
+            st.error("### ❌ Erreur lors de la connexion")
+            st.error(f"Message : {str(e)}")
+            st.error("Détails techniques :")
+            import traceback
+            st.code(traceback.format_exc(), language="python")
         
         # Message d'information
         st.info("""
