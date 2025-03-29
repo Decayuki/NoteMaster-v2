@@ -30,6 +30,7 @@ def get_auth_url():
         # Configurer l'authentification Google
         redirect_url = get_redirect_url()
         
+        # Forcer l'ouverture dans une nouvelle fenêtre et s'assurer que l'URL de redirection est correcte
         auth_config = {
             "provider": "google",
             "options": {
@@ -37,7 +38,7 @@ def get_auth_url():
                 "scopes": "email profile",
                 "queryParams": {
                     "access_type": "offline",
-                    "prompt": "consent"
+                    "prompt": "select_account consent"
                 }
             }
         }
@@ -50,7 +51,7 @@ def get_auth_url():
             return auth_response.url
         return None
     except Exception as e:
-        print(f"Erreur lors de la génération de l'URL d'authentification: {str(e)}")
+        st.error(f"Erreur lors de la génération de l'URL d'authentification: {str(e)}")
         return None
 
 def sign_in_with_google():
@@ -62,34 +63,43 @@ def sign_in_with_google():
         if code:
             return handle_auth_callback(code)
         
-        # Afficher le bouton de connexion qui redirige vers la page d'authentification séparée
-        st.markdown("""
-        <div style="text-align: center">
-            <h3>🔐 Authentification Google requise</h3>
-            <p>Cliquez sur le bouton ci-dessous pour vous connecter avec Google</p>
-            <a href="/Auth_Redirect" target="_top">
-                <button style="
-                    background-color: #4285F4;
-                    color: white;
-                    padding: 12px 24px;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    font-size: 16px;
-                    font-weight: bold;
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 10px;
-                ">
-                    <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
-                    Se connecter avec Google
-                </button>
-            </a>
-        </div>
-        """, unsafe_allow_html=True)
+        # Obtenir l'URL d'authentification directement
+        auth_url = get_auth_url()
         
-        return None  # On ne renvoie plus l'URL ici
+        if auth_url:
+            # Créer un bouton qui ouvre directement l'URL d'authentification dans une nouvelle fenêtre
+            st.markdown(f"""
+            <div style="text-align: center">
+                <h3>🔐 Authentification Google requise</h3>
+                <p>Cliquez sur le bouton ci-dessous pour vous connecter avec Google</p>
+                <a href="{auth_url}" target="_blank">
+                    <button style="
+                        background-color: #4285F4;
+                        color: white;
+                        padding: 12px 24px;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        font-weight: bold;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 10px;
+                    ">
+                        <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
+                        Se connecter avec Google
+                    </button>
+                </a>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <p>⚠️ Après vous être connecté avec Google, <strong>rafraîchissez cette page</strong> pour finaliser la connexion.</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.error("Impossible de générer l'URL d'authentification. Veuillez réessayer.")
+        
+        return None
     except Exception as e:
         st.error("❌ Erreur lors de l'authentification")
         st.error(f"Message : {str(e)}")
