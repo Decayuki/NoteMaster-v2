@@ -11,6 +11,15 @@ def main():
         initial_sidebar_state="expanded"
     )
     
+    # Vérifier si un code d'autorisation est présent dans l'URL
+    code = st.query_params.get("code", None)
+    if code:
+        st.info("🔄 Finalisation de la connexion en cours...")
+        from src.utils.supabase import handle_auth_callback
+        handle_auth_callback(code)
+        # Recharger la page sans les paramètres
+        st.rerun()
+    
     # Vérifier si l'utilisateur est déjà connecté
     from src.utils.supabase import get_user_session
     user_session = get_user_session()
@@ -72,33 +81,31 @@ def main():
                     from src.utils.supabase import sign_in_with_google
                     
                     auth_url = sign_in_with_google()
-                    st.success("URL d'authentification générée avec succès !")
-                    st.code(auth_url, language="text")
-                    
-                    st.markdown(f'''
-                        <div style="text-align: center; margin-top: 20px;">
-                            <a href="{auth_url}" target="_self">
-                                <button style="
-                                    background-color: #4285F4;
-                                    color: white;
-                                    padding: 10px 20px;
-                                    border: none;
-                                    border-radius: 5px;
-                                    cursor: pointer;
-                                    width: 100%;
-                                    display: inline-flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    gap: 10px;
-                                    font-family: Arial, sans-serif;
-                                    text-decoration: none;
-                                ">
-                                    <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
-                                    Continuer vers Google
-                                </button>
-                            </a>
-                        </div>
-                    ''', unsafe_allow_html=True)
+                    if auth_url:
+                        st.markdown(f'''
+                            <div style="text-align: center; margin-top: 20px;">
+                                <a href="{auth_url}" target="_self">
+                                    <button style="
+                                        background-color: #4285F4;
+                                        color: white;
+                                        padding: 10px 20px;
+                                        border: none;
+                                        border-radius: 5px;
+                                        cursor: pointer;
+                                        width: 100%;
+                                        display: inline-flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        gap: 10px;
+                                        font-family: Arial, sans-serif;
+                                        text-decoration: none;
+                                    ">
+                                        <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
+                                        Continuer vers Google
+                                    </button>
+                                </a>
+                            </div>
+                        ''', unsafe_allow_html=True)
                     
                 except Exception as e:
                     st.error("### ❌ Erreur lors de la connexion")
@@ -106,15 +113,6 @@ def main():
                     st.error("Stack trace :")
                     import traceback
                     st.code(traceback.format_exc())
-                    
-                    st.write("### 🔍 Informations de débogage")
-                    st.json({
-                        "PYTHONPATH": sys.path,
-                        "src_path": src_path if 'src_path' in locals() else "non défini",
-                        "current_dir": os.getcwd(),
-                        "files_in_src": os.listdir(src_path) if 'src_path' in locals() and os.path.exists(src_path) else "src n'existe pas",
-                        "files_in_root": os.listdir(os.path.dirname(os.path.abspath(__file__)))
-                    })
         
         # Message d'information
         st.info("""
