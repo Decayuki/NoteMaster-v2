@@ -67,7 +67,7 @@ def sign_in_with_google():
         <div style="text-align: center">
             <h3>🔐 Authentification Google requise</h3>
             <p>Cliquez sur le bouton ci-dessous pour vous connecter avec Google</p>
-            <a href="/auth_redirect" target="_top">
+            <a href="/Auth_Redirect" target="_top">
                 <button style="
                     background-color: #4285F4;
                     color: white;

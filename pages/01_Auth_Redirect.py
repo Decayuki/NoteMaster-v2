@@ -9,14 +9,15 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Masquer le menu Streamlit
-hide_menu = """
+# Masquer le menu Streamlit et la barre latérale
+hide_elements = """
 <style>
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
+.css-1d391kg {visibility: hidden;}
 </style>
 """
-st.markdown(hide_menu, unsafe_allow_html=True)
+st.markdown(hide_elements, unsafe_allow_html=True)
 
 # Obtenir l'URL d'authentification
 auth_url = get_auth_url()
