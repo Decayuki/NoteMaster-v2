@@ -60,23 +60,7 @@ def sign_in_with_google():
         code = st.query_params.get("code", None)
         
         if code:
-            try:
-                # Essayer d'échanger le code contre une session
-                session = conn.auth.exchange_code_for_session({
-                    'auth_code': code
-                })
-                
-                if session:
-                    st.success("✅ Connexion réussie !")
-                    # Effacer les paramètres d'URL
-                    st.query_params.clear()
-                    # Recharger la page
-                    st.rerun()
-                    return True
-            except Exception as e:
-                st.error(f"❌ Erreur lors de l'échange du code : {str(e)}")
-                st.query_params.clear()
-            return False
+            return handle_auth_callback(code)
         
         # Afficher le bouton de connexion qui redirige vers la page d'authentification séparée
         st.markdown("""
@@ -112,6 +96,26 @@ def sign_in_with_google():
         import traceback
         st.code(traceback.format_exc(), language="python")
         return None
+
+def handle_auth_callback(code):
+    """Gère le callback d'authentification et échange le code contre une session"""
+    try:
+        # Essayer d'échanger le code contre une session
+        session = conn.auth.exchange_code_for_session({
+            'auth_code': code
+        })
+        
+        if session:
+            st.success("✅ Connexion réussie !")
+            # Effacer les paramètres d'URL
+            st.query_params.clear()
+            # Recharger la page
+            st.rerun()
+            return True
+    except Exception as e:
+        st.error(f"❌ Erreur lors de l'échange du code : {str(e)}")
+        st.query_params.clear()
+    return False
 
 def sign_out():
     """Déconnexion de l'utilisateur"""
