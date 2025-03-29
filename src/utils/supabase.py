@@ -24,6 +24,35 @@ def get_redirect_url():
     # Sinon, utiliser l'URL par défaut pour le développement local
     return "http://localhost:8501"
 
+def get_auth_url():
+    """Génère une URL d'authentification Google sans afficher d'interface"""
+    try:
+        # Configurer l'authentification Google
+        redirect_url = get_redirect_url()
+        
+        auth_config = {
+            "provider": "google",
+            "options": {
+                "redirectTo": redirect_url,
+                "scopes": "email profile",
+                "queryParams": {
+                    "access_type": "offline",
+                    "prompt": "consent"
+                }
+            }
+        }
+        
+        # Générer l'URL d'authentification
+        auth_response = conn.auth.sign_in_with_oauth(auth_config)
+        
+        # Vérifier si nous avons une URL
+        if hasattr(auth_response, 'url'):
+            return auth_response.url
+        return None
+    except Exception as e:
+        print(f"Erreur lors de la génération de l'URL d'authentification: {str(e)}")
+        return None
+
 def sign_in_with_google():
     """Initialise la connexion avec Google"""
     try:
@@ -49,91 +78,34 @@ def sign_in_with_google():
                 st.query_params.clear()
             return False
         
-        # Configurer l'authentification Google
-        redirect_url = get_redirect_url()
+        # Afficher le bouton de connexion qui redirige vers la page d'authentification séparée
+        st.markdown("""
+        <div style="text-align: center">
+            <h3>🔐 Authentification Google requise</h3>
+            <p>Cliquez sur le bouton ci-dessous pour vous connecter avec Google</p>
+            <a href="/auth_redirect" target="_top">
+                <button style="
+                    background-color: #4285F4;
+                    color: white;
+                    padding: 12px 24px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: bold;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                ">
+                    <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
+                    Se connecter avec Google
+                </button>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
         
-        auth_config = {
-            "provider": "google",
-            "options": {
-                "redirectTo": redirect_url,
-                "scopes": "email profile",
-                "queryParams": {
-                    "access_type": "offline",
-                    "prompt": "consent"
-                }
-            }
-        }
-        
-        # Générer l'URL d'authentification
-        auth_response = conn.auth.sign_in_with_oauth(auth_config)
-        
-        # Vérifier si nous avons une URL
-        if hasattr(auth_response, 'url'):
-            auth_url = auth_response.url
-            
-            # Afficher un message d'information avec instructions claires
-            st.info(
-                "### 🔐 Authentification Google requise\n\n"
-                "Pour vous connecter à NoteMaster v{}, suivez ces étapes :\n\n"
-                "1. Cliquez sur le bouton ci-dessous pour ouvrir la page de connexion Google\n"
-                "2. Connectez-vous avec votre compte Google\n"
-                "3. Revenez sur cette page après l'authentification\n"
-                "4. Si nécessaire, cliquez sur 'Finaliser la connexion'".format(VERSION),
-                icon="ℹ️"
-            )
-            
-            # Afficher l'URL directement pour le débogage
-            st.success("URL d'authentification générée avec succès !")
-            
-            # Créer un lien direct vers l'URL d'authentification
-            st.markdown(f'''
-                <div style="text-align: center; margin: 20px 0;">
-                    <a href="{auth_url}" target="_self">
-                        <button 
-                            style="
-                                background-color: #4285F4;
-                                color: white;
-                                padding: 12px 24px;
-                                border: none;
-                                border-radius: 5px;
-                                cursor: pointer;
-                                font-size: 16px;
-                                font-weight: bold;
-                                display: inline-flex;
-                                align-items: center;
-                                justify-content: center;
-                                gap: 10px;
-                            ">
-                            <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
-                            Continuer vers Google
-                        </button>
-                    </a>
-                </div>
-                
-                <div style="padding: 15px; border: 1px solid #f0f2f6; border-radius: 8px; background-color: #f8f9fa; margin-top: 20px;">
-                    <p><strong>⚠️ Important :</strong> Si vous êtes redirigé vers cette page avec une URL contenant <code>code=...</code> :</p>
-                    <button 
-                        onclick="window.location.href=window.location.href" 
-                        style="
-                            padding: 8px 16px; 
-                            background-color: #4285F4; 
-                            color: white; 
-                            border: none; 
-                            border-radius: 4px; 
-                            cursor: pointer; 
-                            margin-top: 10px;
-                            font-weight: bold;
-                        ">
-                        Finaliser la connexion
-                    </button>
-                </div>
-            ''', unsafe_allow_html=True)
-            
-            return auth_url
-        else:
-            st.error("❌ Impossible d'obtenir l'URL d'authentification")
-            return None
-        
+        return None  # On ne renvoie plus l'URL ici
     except Exception as e:
         st.error("❌ Erreur lors de l'authentification")
         st.error(f"Message : {str(e)}")
