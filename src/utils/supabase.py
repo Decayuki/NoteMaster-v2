@@ -107,24 +107,19 @@ def sign_in_with_google():
         st.code(traceback.format_exc(), language="python")
         return None
 
-def handle_auth_callback(code):
-    """Gère le callback d'authentification et échange le code contre une session"""
+def validate_token(token):
+    """Valide un token d'accès et récupère la session utilisateur"""
     try:
-        # Essayer d'échanger le code contre une session
-        session = conn.auth.exchange_code_for_session({
-            'auth_code': code
-        })
+        # Configurer la session avec le token fourni
+        session = conn.auth.set_session(token)
         
         if session:
+            # Stocker la session dans Streamlit
+            st.session_state.user_session = session
             st.success("✅ Connexion réussie !")
-            # Effacer les paramètres d'URL
-            st.query_params.clear()
-            # Recharger la page
-            st.rerun()
             return True
     except Exception as e:
-        st.error(f"❌ Erreur lors de l'échange du code : {str(e)}")
-        st.query_params.clear()
+        st.error(f"❌ Erreur lors de la validation du token : {str(e)}")
     return False
 
 def sign_out():

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteMaster - Authentification</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .auth-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 400px;
+            max-width: 90%;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .logo {
+            width: 80px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            gap: 10px;
+        }
+        button img {
+            width: 20px;
+            height: 20px;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <img src="https://raw.githubusercontent.com/Decayuki/NoteMaster-v2/main/src/assets/logo.png" alt="NoteMaster Logo" class="logo">
+        <h1>NoteMaster</h1>
+        <p>Connectez-vous avec Google pour accéder à vos notes et quiz.</p>
+        
+        <button id="google-signin">
+            <img src="https://www.google.com/favicon.ico" alt="Google Logo">
+            Se connecter avec Google
+        </button>
+        
+        <div id="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Configuration Supabase
+        const SUPABASE_URL = 'https://rygktzcbjsigbfkodobx.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5Z2t0emNianNpZ2Jma29kb2J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTEyMDIyNzgsImV4cCI6MjAyNjc3ODI3OH0.e5Hja0ZgZN-5GfZNMS2-wZHGLRvC3C49UvpJ0yPHuUk';
+        const REDIRECT_URL = 'https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app';
+        
+        // Initialisation de Supabase
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Fonctions d'aide
+        function showStatus(message, type) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+            statusElement.style.display = 'block';
+        }
+        
+        // Vérifier si nous revenons d'une authentification
+        window.addEventListener('load', async () => {
+            // Récupérer le hash de l'URL après authentification
+            const hash = window.location.hash;
+            
+            if (hash && hash.includes('access_token')) {
+                showStatus('Authentification réussie ! Redirection...', 'loading');
+                
+                try {
+                    // Extraire le token et échanger contre une session
+                    const { data, error } = await supabase.auth.getSession();
+                    
+                    if (error) throw error;
+                    
+                    if (data && data.session) {
+                        // Rediriger vers l'application Streamlit avec le token
+                        const token = data.session.access_token;
+                        window.location.href = `${REDIRECT_URL}?token=${token}`;
+                    } else {
+                        showStatus('Erreur : Session non trouvée.', 'error');
+                    }
+                } catch (error) {
+                    showStatus(`Erreur : ${error.message}`, 'error');
+                    console.error(error);
+                }
+            }
+        });
+        
+        // Gestionnaire de clic pour le bouton de connexion
+        document.getElementById('google-signin').addEventListener('click', async () => {
+            showStatus('Redirection vers Google...', 'loading');
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin + window.location.pathname,
+                        queryParams: {
+                            access_type: 'offline',
+                            prompt: 'select_account'
+                        }
+                    }
+                });
+                
+                if (error) throw error;
+                
+                // Rediriger vers l'URL d'authentification Google
+                window.location.href = data.url;
+            } catch (error) {
+                showStatus(`Erreur : ${error.message}`, 'error');
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -22,26 +22,24 @@ def main():
             except Exception as e:
                 st.error(f"Erreur: {e}")
     
-    # Vérifier si un code d'autorisation est présent dans l'URL
-    code = st.query_params.get("code", None)
-    if code:
+    # Vérifier si un token est présent dans l'URL
+    token = st.query_params.get("token", None)
+    if token:
         st.info("🔄 Finalisation de la connexion en cours...")
         try:
-            from src.utils.supabase import conn
-            # Échanger directement le code contre une session
-            session = conn.auth.exchange_code_for_session({
-                'auth_code': code
-            })
-            if session:
-                st.success("✅ Connexion réussie!")
-                # Effacer les paramètres d'URL
+            # Valider le token et créer une session
+            from src.utils.supabase import validate_token
+            if validate_token(token):
+                # Effacer le token de l'URL pour la sécurité
                 st.query_params.clear()
                 # Recharger la page pour montrer le tableau de bord
                 st.rerun()
             else:
-                st.error("❌ Session non créée")
+                st.error("❌ Token invalide ou expiré")
+                # Nettoyer l'URL
+                st.query_params.clear()
         except Exception as e:
-            st.error(f"❌ Erreur lors de l'échange du code: {str(e)}")
+            st.error(f"❌ Erreur lors de la validation du token: {str(e)}")
             import traceback
             st.code(traceback.format_exc(), language="python")
             # Nettoyage des paramètres pour éviter une boucle
@@ -59,7 +57,7 @@ def main():
         show_dashboard()
         return
 
-    # Afficher le formulaire de connexion avec mode débogage
+    # Afficher le formulaire de connexion
     st.title("📚 NoteMaster - Votre assistant d'études")
     
     # Section de connexion
@@ -67,57 +65,48 @@ def main():
         st.subheader("🔐 Connexion")
         st.write("Connectez-vous avec votre compte Google pour accéder à vos notes et quiz.")
         
-        # Obtenir l'URL d'authentification directement
-        from src.utils.supabase import get_auth_url
-        auth_url = get_auth_url()
+        # URL de la page d'authentification externe
+        auth_page_url = "https://decayuki.github.io/notemaster-auth/"
         
-        if auth_url:
-            # Afficher l'URL pour débogage
-            with st.expander("Détails de l'URL d'authentification (débogage)"):
-                st.code(auth_url, language="text")
-                st.info("👆 C'est l'URL générée par Supabase pour l'authentification Google")
-            
-            # Créer un bouton qui ouvre directement l'URL d'authentification dans une nouvelle fenêtre
-            st.markdown(f"""
-            <div style="text-align: center">
-                <a href="{auth_url}" target="_blank">
-                    <button style="
-                        background-color: #4285F4;
-                        color: white;
-                        padding: 12px 24px;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                        font-size: 16px;
-                        font-weight: bold;
-                        display: inline-flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 10px;
-                    ">
-                        <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
-                        Se connecter avec Google
-                    </button>
-                </a>
-            </div>
-            <div style="text-align: center; margin-top: 20px;">
-                <p>⚠️ Après vous être connecté avec Google, <strong>rafraîchissez cette page</strong> pour finaliser la connexion.</p>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.error("Impossible de générer l'URL d'authentification. Veuillez réessayer.")
+        # Créer un bouton qui ouvre la page d'authentification externe
+        st.markdown(f"""
+        <div style="text-align: center">
+            <a href="{auth_page_url}" target="_blank">
+                <button style="
+                    background-color: #4285F4;
+                    color: white;
+                    padding: 12px 24px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: bold;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                ">
+                    <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px;"/>
+                    Se connecter avec Google
+                </button>
+            </a>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <p>Cette authentification contourne le problème d'iframe de Streamlit Cloud.</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    # Instructions de débogage
-    with st.expander("🛠️ Instructions de débogage"):
+    # Comment ça fonctionne
+    with st.expander("🔍 Comment fonctionne cette authentification"):
         st.write("""
-        Si l'authentification ne fonctionne pas, essayez ces étapes :
+        Cette méthode d'authentification utilise une page externe hébergée sur GitHub Pages pour:
         
-        1. Ouvrez l'URL d'authentification dans un nouvel onglet directement
-        2. Une fois authentifié, copiez le code qui apparaît dans l'URL
-        3. Revenez à cette page et ajoutez manuellement `?code=VOTRE_CODE` à l'URL
-        4. Appuyez sur Entrée pour soumettre l'URL
+        1. Contourner les limitations d'iframe de Streamlit Cloud
+        2. Gérer l'authentification Google de manière sécurisée
+        3. Obtenir un token d'accès validé par Supabase
+        4. Vous rediriger vers cette application avec le token
         
-        Exemple: `https://notemaster-v2-jkvg9zktfpwttpjuxzwcpe.streamlit.app/?code=VOTRE_CODE`
+        C'est une approche recommandée pour les applications Streamlit en production.
         """)
     
     # Style personnalisé
